@@ -69,13 +69,13 @@ async def ask_gpt(text: str) -> str:
     if len(text.strip()) < 10:
         return text
     try:
-        response = await openai_client.chat.completions.create(
-    model='gpt-3.5-turbo',
-    messages=[
-        {"role": "system", "content": "Ты редактор новостей."},
-        {"role": "user", "content": f"{GPT_PROMPT}\n\n{text}"}
-    ]
-)
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Ты редактор новостей."},
+                {"role": "user", "content": f"{GPT_PROMPT}\n\n{text}"}
+            ]
+        )
         result = clean_gpt_output(response.choices[0].message.content.strip())
         return result or "[Текст от GPT пуст — добавьте вручную]"
     except Exception as e:
