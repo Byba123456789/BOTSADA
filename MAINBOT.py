@@ -33,7 +33,12 @@ PUBLISH_QUEUE_FILE = "publish_queue.json"
 
 transport = httpx.HTTPTransport(proxy=proxy_url)
 http_client = httpx.Client(transport=transport)
-openai_client = OpenAI(api_key=OPENAI_API_KEY, http_client=http_client)
+openai_client = OpenAI(
+    api_key=OPENAI_API_KEY,
+    base_url="https://openrouter.ai/api/v1",
+    http_client=http_client
+)
+
 
 SOURCE_CHANNELS = [
     'rian_ru', 'exploitex', 'smi_rf_moskva', 'media1337', 'novosti_efir',
