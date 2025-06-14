@@ -6,7 +6,7 @@ import httpx
 from uuid import uuid4
 from collections import defaultdict
 from telethon import TelegramClient, events
-import openai
+from openai import OpenAI
 from aiogram import types, Bot, Dispatcher, F
 from aiogram.enums import ParseMode
 from aiogram.types import (
@@ -31,20 +31,9 @@ TARGET_CHANNEL = os.getenv("TARGET_CHANNEL")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PUBLISH_QUEUE_FILE = "publish_queue.json"
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.base_url = "https://openrouter.ai/api/v1"
-
 transport = httpx.HTTPTransport(proxy=proxy_url)
-http_client = httpx.Client(
-    transport=transport,
-    headers={
-        "Authorization": f"Bearer {openai.api_key}",
-        "HTTP-Referer": "https://chat.openai.com"
-    }
-)
-
-openai._client = http_client
-
+http_client = httpx.Client(transport=transport)
+openai_client = OpenAI(api_key=OPENAI_API_KEY, http_client=http_client)
 
 SOURCE_CHANNELS = [
     'rian_ru', 'exploitex', 'smi_rf_moskva', 'media1337', 'novosti_efir',
@@ -80,8 +69,8 @@ async def ask_gpt(text: str) -> str:
     if len(text.strip()) < 10:
         return text
     try:
-        response = await openai.ChatCompletion.acreate(
-            model="gpt-3.5-turbo",
+        response = openai_client.chat.completions.create(
+            model='gpt-3.5-turbo',
             messages=[
                 {"role": "system", "content": "Ты редактор новостей."},
                 {"role": "user", "content": f"{GPT_PROMPT}\n\n{text}"}
@@ -92,6 +81,7 @@ async def ask_gpt(text: str) -> str:
     except Exception as e:
         print(f"❌ GPT ошибка: {e}")
         return "[GPT не сработал — отредактируйте текст]"
+
 
 def get_publish_keyboard(post_id):
     return InlineKeyboardMarkup(
