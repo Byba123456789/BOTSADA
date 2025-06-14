@@ -32,12 +32,18 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PUBLISH_QUEUE_FILE = "publish_queue.json"
 
 transport = httpx.HTTPTransport(proxy=proxy_url)
-http_client = httpx.Client(transport=transport)
+http_client = httpx.Client(
+    transport=transport,
+    headers={
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "HTTP-Referer": "https://chat.openai.com"
+    }
+)
 openai_client = OpenAI(
-    api_key=OPENAI_API_KEY,
     base_url="https://openrouter.ai/api/v1",
     http_client=http_client
 )
+
 
 
 SOURCE_CHANNELS = [
